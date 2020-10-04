@@ -1,6 +1,6 @@
-PYTHON = python
+PYTHON = python3
 
-.PHONY: default install rebuild build uninstall reinstall clean test
+.PHONY: default reinstall install upload uninstall rebuild build clean test
 
 default:
 	make rebuild
@@ -18,6 +18,11 @@ install: dist/*.whl
 	$(PYTHON) -m pip install dist/*.whl
 	$(PYTHON) -m pip show markdown_link_attr_modifier
 
+upload: dist/*.whl
+	$(PYTHON) -m twine check dist/*.whl
+	# username is: __token__
+	$(PYTHON) -m twine upload dist/*.whl
+
 uninstall:
 	$(PYTHON) -m pip uninstall -y markdown_link_attr_modifier
 
@@ -25,7 +30,7 @@ rebuild build dist/*.whl: ./setup.py ./markdown_link_attr_modifier.py
 	# make sure clean old versions
 	make clean
 
-	$(PYTHON) ./setup.py bdist_wheel
+	$(PYTHON) ./setup.py bdist_wheel --universal
 
 	# 'pip install' is buggy when .egg-info exist
 	rm -rf *.egg-info build

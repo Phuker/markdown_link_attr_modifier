@@ -1,6 +1,6 @@
 # markdown\_link\_attr\_modifier
 
-A [Python-Markdown](https://github.com/Python-Markdown/markdown) extension to modify attributes of all `<a>` tag links. You can add `target="_blank"` attribute, control `opener` and `refferrer` policy by adding related attributes, and add custom attributes.
+A [Python-Markdown](https://github.com/Python-Markdown/markdown) extension to modify attributes of all `<a>` tag links. You can add `target="_blank"` attribute, control `opener` and `refferrer` policy by adding related attributes, and add any custom attributes.
 
 By default,
 
@@ -26,15 +26,13 @@ Support [Python-Markdown](https://github.com/Python-Markdown/markdown) `3.x`. Te
 python3 -m pip install -U pip wheel setuptools
 ```
 
-### 1 line command install
-
-`git` command required.
+### Install from PyPI
 
 ```bash
-python3 -m pip install -U git+https://github.com/Phuker/markdown_link_attr_modifier.git
+python3 -m pip install -U markdown-link-attr-modifier
 ```
 
-### Install manually
+### Install from source code manually
 
 First, clone/download this repo, and then:
 
@@ -66,7 +64,6 @@ print(markdown.markdown(s, extensions=['markdown_link_attr_modifier']))
 
 # config
 print(markdown.markdown('[local](local.html)', extensions=['markdown_link_attr_modifier'], extension_configs={'markdown_link_attr_modifier': {'external_only': False}}))
-
 ```
 
 You can also `import` manually:
@@ -82,6 +79,8 @@ print(markdown.markdown(s, extensions=[LinkAttrModifierExtension()]))
 print(markdown.markdown(s, extensions=[LinkAttrModifierExtension(external_only=False)]))
 ```
 
+For more information, see [Extensions - Python-Markdown documentation](https://python-markdown.github.io/extensions/) and [Using Markdown as a Python Library - Python-Markdown documentation](https://python-markdown.github.io/reference/#extensions).
+
 ### CLI
 
 ```bash
@@ -92,8 +91,7 @@ For more information, see [Using Python-Markdown on the Command Line - Python-Ma
 
 ### Pelican
 
-[Pelican
-](https://blog.getpelican.com/) is a static site generator.
+[Pelican](https://blog.getpelican.com/) is a static site generator.
 
 Edit `pelicanconf.py`, `MARKDOWN` dict variable. Example:
 
@@ -134,13 +132,13 @@ Options about `<a>` tag attributes:
 
 ## Tests
 
-Test installed:
+Test installed module:
 
 ```bash
 python3 -m markdown_link_attr_modifier -v
 ```
 
-Test this repo without install:
+Test module in this repo without install:
 
 ```bash
 make test
