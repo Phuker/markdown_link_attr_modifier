@@ -14,6 +14,12 @@ https://python-markdown.github.io/extensions/api/
 https://docs.python.org/3/library/xml.etree.elementtree.html
 """
 
+import os
+import sys
+import logging
+import unittest
+
+import markdown
 from markdown.extensions import Extension
 from markdown.treeprocessors import Treeprocessor
 
@@ -68,3 +74,97 @@ class LinkAttrModifierExtension(Extension):
 def makeExtension(**kwargs):
     return LinkAttrModifierExtension(**kwargs)
 
+
+class LinkAttrModifierExtensionTests(unittest.TestCase):
+    def test_warm_up(self):
+        log = logging.getLogger("LinkAttrModifierExtensionTests")
+        sys.stderr.write('\n') # break incomplete line output by 'unittest -v'
+
+        s = '''
+# hello
+
+## world
+
+[abc](https://www.example.com/)
+
+fuck [abc](https://www.example.com/) shit
+
+[abc](https://www.example.com/){:abc="def"}
+
+fuck [abc](https://www.example.com/){:abc="def"} shit
+
+bye
+
+'''
+        log.info('markdown = %s', s)
+
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension()])
+        log.info('Result HTML = %s', result)
+        
+        self.assertIn('href="https://www.example.com/"', result)
+
+    def test_local_link(self):
+        log = logging.getLogger("LinkAttrModifierExtensionTests")
+        sys.stderr.write('\n')
+
+        s = '[abc](local.html)'
+        log.info('markdown = %s', s)
+
+        config = {'external_only': True}
+        log.info('Config: %r', config)
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
+        log.info('Result HTML = %s', result)
+        self.assertNotIn('target="_blank"', result)
+
+        config = {'external_only': False}
+        log.info('Config: %r', config)
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
+        log.info('Result HTML = %s', result)
+        self.assertIn('target="_blank"', result)
+    
+    def test_external_link(self):
+        log = logging.getLogger("LinkAttrModifierExtensionTests")
+        sys.stderr.write('\n')
+
+        s = '[example](https://www.example.com/)'
+        log.info('markdown = %s', s)
+
+        config = {'new_tab': False}
+        log.info('Config: %r', config)
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
+        log.info('Result HTML = %s', result)
+        self.assertNotIn('target="_blank"', result)
+
+        config = {'new_tab': True}
+        log.info('Config: %r', config)
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
+        log.info('Result HTML = %s', result)
+        self.assertIn('target="_blank"', result)
+
+        config = {'security': False}
+        log.info('Config: %r', config)
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
+        log.info('Result HTML = %s', result)
+        self.assertNotIn('referrerpolicy="no-referrer"', result)
+
+        config = {'security': True}
+        log.info('Config: %r', config)
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
+        log.info('Result HTML = %s', result)
+        self.assertIn('referrerpolicy="no-referrer"', result)
+
+        config = {'custom_attrs': {'fuck-key': 'fuck-value'}}
+        log.info('Config: %r', config)
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
+        log.info('Result HTML = %s', result)
+        self.assertIn('fuck-key="fuck-value"', result)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s [%(levelname)s]:%(message)s',
+        datefmt='%H:%M:%S',
+        stream=sys.stderr,
+    )
+    unittest.main()
