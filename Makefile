@@ -18,19 +18,19 @@ install: dist/*.whl
 	$(PYTHON) -m pip install dist/*.whl
 	$(PYTHON) -m pip show markdown_link_attr_modifier
 
-upload: dist/*.whl
-	$(PYTHON) -m twine check dist/*.whl
+upload: dist/*.whl dist/*.tar.gz
+	$(PYTHON) -m twine check dist/*.whl dist/*.tar.gz
 	# username is: __token__
-	$(PYTHON) -m twine upload dist/*.whl
+	$(PYTHON) -m twine upload dist/*.whl dist/*.tar.gz
 
 uninstall:
 	$(PYTHON) -m pip uninstall -y markdown_link_attr_modifier
 
-rebuild build dist/*.whl: ./setup.py ./markdown_link_attr_modifier.py
+rebuild build dist/*.whl dist/*.tar.gz: ./setup.py ./markdown_link_attr_modifier.py
 	# make sure clean old versions
 	make clean
 
-	$(PYTHON) ./setup.py bdist_wheel --universal
+	$(PYTHON) ./setup.py sdist bdist_wheel --universal
 
 	# 'pip install' is buggy when .egg-info exist
 	rm -rf *.egg-info build
