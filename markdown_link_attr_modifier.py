@@ -7,9 +7,17 @@ Python markdown extension to modify attributes of all <a> links
 Author: https://github.com/Phuker
 
 Referenced & related:
-https://github.com/danasilver/markdown-newtab
+
 https://stackoverflow.com/questions/4425198/
+https://stackoverflow.com/questions/46525733/
+
+https://github.com/danasilver/markdown-newtab
+
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types
+https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a
+https://mathiasbynens.github.io/rel-noopener/
+
 https://python-markdown.github.io/extensions/api/
 https://docs.python.org/3/library/xml.etree.elementtree.html
 """
@@ -45,7 +53,7 @@ class LinkAttrModifierTreeprocessor(Treeprocessor):
                     elem.set('target', '_blank')
 
                 if self.config.get('security')[0]:
-                    elem.set('rel', 'noopener norefferrer')
+                    elem.set('rel', 'noopener noreferrer')
                     elem.set('referrerpolicy', 'no-referrer')
                 
                 custom_attrs = self.config.get('custom_attrs')[0]

@@ -11,7 +11,7 @@ By default,
 will become
 
 ```html
-<p><a href="https://www.example.com/" referrerpolicy="no-referrer" rel="noopener norefferrer" target="_blank">abc</a></p>
+<p><a href="https://www.example.com/" referrerpolicy="no-referrer" rel="noopener noreferrer" target="_blank">abc</a></p>
 ```
 
 with this extension.
