@@ -1,6 +1,6 @@
 # markdown\_link\_attr\_modifier
 
-A [Python-Markdown](https://github.com/Python-Markdown/markdown) extension to modify attributes of all `<a>` tag links. You can add `target="_blank"` attribute, control `opener` and `refferrer` policy by adding related attributes, and add any custom attributes.
+A [Python-Markdown](https://github.com/Python-Markdown/markdown) extension to modify attributes of all `<a>` tag links. You can add `target="_blank"` attribute, control `opener` and `referrer` policy by adding related attributes, and add any custom attributes.
 
 By default,
 
