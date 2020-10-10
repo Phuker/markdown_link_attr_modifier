@@ -10,12 +10,12 @@ with open("Readme.PyPI.md", "r") as f:
 
 setup(
     name = "markdown_link_attr_modifier",
-    version = "0.1.5",
+    version = "0.1.6",
     description = "A Python-Markdown extension to modify attributes of all <a> tag links",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author = "Phuker",
-    # author_email = 'Phuker@users.noreply.github.com',
+    author_email = 'Phuker@users.noreply.github.com',
     url = "https://github.com/Phuker/markdown_link_attr_modifier",
     license = "GNU General Public License v3.0",
     packages = [],

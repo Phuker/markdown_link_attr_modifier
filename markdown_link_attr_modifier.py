@@ -91,17 +91,7 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
         s = '''
 # hello
 
-## world
-
 [abc](https://www.example.com/)
-
-fuck [abc](https://www.example.com/) shit
-
-[abc](https://www.example.com/){:abc="def"}
-
-fuck [abc](https://www.example.com/){:abc="def"} shit
-
-bye
 
 '''
         log.info('markdown = %s', s)
@@ -153,12 +143,14 @@ bye
         log.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
         log.info('Result HTML = %s', result)
+        self.assertNotIn('rel="noopener noreferrer"', result)
         self.assertNotIn('referrerpolicy="no-referrer"', result)
 
         config = {'security': True}
         log.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
         log.info('Result HTML = %s', result)
+        self.assertIn('rel="noopener noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
 
         config = {'custom_attrs': {'fuck-key': 'fuck-value'}}
@@ -166,6 +158,24 @@ bye
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
         log.info('Result HTML = %s', result)
         self.assertIn('fuck-key="fuck-value"', result)
+    
+    def test_xml_level(self):
+        log = logging.getLogger("LinkAttrModifierExtensionTests")
+        sys.stderr.write('\n')
+
+        s = '''
+- abc
+- def
+    - [example](https://www.example.com/)
+- ghi
+'''
+        log.info('markdown = %s', s)
+
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension()])
+        log.info('Result HTML = %s', result)
+        
+        self.assertIn('href="https://www.example.com/"', result)
+        self.assertIn('target="_blank"', result)
 
 
 if __name__ == "__main__":
