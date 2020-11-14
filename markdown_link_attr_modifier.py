@@ -43,7 +43,18 @@ class LinkAttrModifierTreeprocessor(Treeprocessor):
                 return
             
             herf_lower = href.lower()
-            match_conditions = [not herf_lower.startswith('#')]
+            match_conditions = [
+                not herf_lower.startswith('#'),
+                not herf_lower.startswith('javascript:'),
+                not herf_lower.startswith('mailto:'),
+
+                # <someone@example.com> ==> <a href="&#109;&#97;&#105;&#108; ...
+                # see class AutomailInlineProcessor in
+                # https://github.com/Python-Markdown/markdown/blob/master/markdown/inlinepatterns.py
+                # util.AMP_SUBSTITUTE in
+                # https://github.com/Python-Markdown/markdown/blob/master/markdown/util.py
+                not herf_lower.startswith('\x02amp\x03#109;\x02amp\x03#97;\x02amp\x03#105;\x02amp\x03#108;\x02amp\x03#116;\x02amp\x03#111;\x02amp\x03#58;'),
+            ]
 
             if self.config.get('external_only')[0]:
                 match_conditions.append(herf_lower.startswith('http://') or herf_lower.startswith('https://'))
@@ -100,6 +111,35 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
         log.info('Result HTML = %s', result)
         
         self.assertIn('href="https://www.example.com/"', result)
+
+    def test_skip_link(self):
+        log = logging.getLogger("LinkAttrModifierExtensionTests")
+        sys.stderr.write('\n')
+
+        # not work: 
+        # <javascript:alert(0);> ==> <javascript:alert(0);>
+        # <#test-1> ==> <p>&lt;#test-1&gt;</p>
+        s = '''
+[alert0](javascript:alert(1);)
+
+[test-2](#test-3)
+
+<test4@example.com>
+
+[test5](mailto:test6@example.com)
+'''
+        log.info('markdown = %s', s)
+
+        config = {'external_only': False}
+        log.info('Config: %r', config)
+
+        result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
+        log.info('Result HTML = %s', result)
+
+        self.assertIn('<a href="javascript:alert(1);">alert0</a>', result)
+        self.assertIn('<a href="#test-3">test-2</a>', result)
+        self.assertIn('<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#116;&#101;&#115;&#116;&#52;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#99;&#111;&#109;">&#116;&#101;&#115;&#116;&#52;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#99;&#111;&#109;</a>', result)
+        self.assertIn('<a href="mailto:test6@example.com">test5</a>', result)
 
     def test_local_link(self):
         log = logging.getLogger("LinkAttrModifierExtensionTests")

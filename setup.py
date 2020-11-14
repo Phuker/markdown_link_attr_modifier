@@ -10,7 +10,7 @@ with open("Readme.PyPI.md", "r") as f:
 
 setup(
     name = "markdown_link_attr_modifier",
-    version = "0.1.6",
+    version = "0.1.7",
     description = "A Python-Markdown extension to modify attributes of all <a> tag links",
     long_description=long_description,
     long_description_content_type="text/markdown",

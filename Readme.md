@@ -126,9 +126,8 @@ Options about how to match `<a>` links:
 Options about `<a>` tag attributes:
 
 - `new_tab`: Default is `True`. Open in new tab, set `target="_blank"` attribute.
-- `security`: Default is `True`. Security, no referrer, no opener.
+- `security`: Default is `True`. Security and privacy, [no referrer](https://developer.mozilla.org/en-US/docs/Web/Security/Referer_header:_privacy_and_security_concerns), [no opener](https://mathiasbynens.github.io/rel-noopener/).
 - `custom_attrs`: Default is `{}`, Custom attributes, dict variable.
-
 
 ## Tests
 
