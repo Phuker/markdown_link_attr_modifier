@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 
 from setuptools import setup
@@ -11,7 +11,7 @@ with open("Readme.PyPI.md", "r") as f:
 setup(
     name = "markdown_link_attr_modifier",
     version = "0.1.7",
-    description = "A Python-Markdown extension to modify attributes of all <a> tag links",
+    description = "A Python-Markdown extension to modify attributes of <a> tag links",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author = "Phuker",
@@ -31,5 +31,5 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Text Processing :: Markup :: Markdown',
     ],
-    python_requires = '>=2.7'
+    python_requires = '>=3.6'
 )

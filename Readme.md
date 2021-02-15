@@ -1,30 +1,37 @@
 # markdown\_link\_attr\_modifier
 
-A [Python-Markdown](https://github.com/Python-Markdown/markdown) extension to modify attributes of all `<a>` tag links. You can add `target="_blank"` attribute, control `opener` and `referrer` policy by adding related attributes, and add any custom attributes.
+A [Python-Markdown](https://github.com/Python-Markdown/markdown) extension to modify attributes of `<a>` link tags. With this extension, you can:
 
-By default,
+- Open links in new tab by adding `target="_blank"` attribute (along with `rel="noopener"` attribute for [security reasons](https://mathiasbynens.github.io/rel-noopener/))
+- Do not send `Referer` (sic) request header by setting related attributes for [privacy and security reasons](https://developer.mozilla.org/en-US/docs/Web/Security/Referer_header:_privacy_and_security_concerns)
+- Auto add [`title` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/title)
+- Add/overwrite any custom attributes
+
+For instance, this markdown code
 
 ```markdown
-[abc](https://www.example.com/)
+[abc](https://example.com/)
 ```
 
-will become
+could become
 
 ```html
-<p><a href="https://www.example.com/" referrerpolicy="no-referrer" rel="noopener noreferrer" target="_blank">abc</a></p>
+<p><a href="https://example.com/" referrerpolicy="no-referrer" rel="noopener noreferrer" target="_blank" title="abc">abc</a></p>
 ```
 
 with this extension.
 
-Support [Python-Markdown](https://github.com/Python-Markdown/markdown) `3.x`. Tested against Python `3.8.5` + Python-Markdown `3.2.2`, and Python `2.7.17` + Python-Markdown `3.1.1`.
+Support [Python-Markdown](https://github.com/Python-Markdown/markdown) `3.x`. Tested against Python `3.9.1` + Python-Markdown `3.3.3`. Not support Python < `3.6` (including `2.7.x`) anymore since version `0.2.0`.
 
 ## Install
 
-### Prepare
+Before you start, check and upgrade your `pip` installation.
 
 ```bash
 python3 -m pip install -U pip wheel setuptools
 ```
+
+You can install this package with any of the methods below.
 
 ### Install from PyPI
 
@@ -59,11 +66,23 @@ python3 -m pip show markdown_link_attr_modifier
 ```python
 import markdown
 
-s = '[example](https://www.example.com/)'
-print(markdown.markdown(s, extensions=['markdown_link_attr_modifier']))
+s = '[example](https://example.com/)'
+extensions = ['markdown_link_attr_modifier', ]
+extension_configs = {
+    'markdown_link_attr_modifier': {
+        'new_tab': 'on',
+        'no_referrer': 'external_only',
+        'auto_title': 'on',
+    },
+}
 
-# config
-print(markdown.markdown('[local](local.html)', extensions=['markdown_link_attr_modifier'], extension_configs={'markdown_link_attr_modifier': {'external_only': False}}))
+print(markdown.markdown(s, extensions=extensions, extension_configs=extension_configs))
+```
+
+Output:
+
+```html
+<p><a href="https://example.com/" referrerpolicy="no-referrer" rel="noopener noreferrer" target="_blank" title="example">example</a></p>
 ```
 
 You can also `import` manually:
@@ -72,11 +91,20 @@ You can also `import` manually:
 import markdown
 from markdown_link_attr_modifier import LinkAttrModifierExtension
 
-s = '[example](https://www.example.com/)'
+s = '[example](https://example.com/)'
+
+# without config
 print(markdown.markdown(s, extensions=[LinkAttrModifierExtension()]))
 
-# config
-print(markdown.markdown(s, extensions=[LinkAttrModifierExtension(external_only=False)]))
+# with config
+print(markdown.markdown(s, extensions=[LinkAttrModifierExtension(new_tab='on', no_referrer='external_only')]))
+```
+
+Output:
+
+```html
+<p><a href="https://example.com/">example</a></p>
+<p><a href="https://example.com/" referrerpolicy="no-referrer" rel="noopener noreferrer" target="_blank">example</a></p>
 ```
 
 For more information, see [Extensions - Python-Markdown documentation](https://python-markdown.github.io/extensions/) and [Using Markdown as a Python Library - Python-Markdown documentation](https://python-markdown.github.io/reference/#extensions).
@@ -85,6 +113,7 @@ For more information, see [Extensions - Python-Markdown documentation](https://p
 
 ```bash
 python3 -m markdown -x markdown_link_attr_modifier input.md > output.html
+python3 -m markdown -x markdown_link_attr_modifier -c config.json input.md > output.html
 ```
 
 For more information, see [Using Python-Markdown on the Command Line - Python-Markdown documentation](https://python-markdown.github.io/cli/).
@@ -108,7 +137,9 @@ MARKDOWN = {
         'markdown.extensions.toc': {},
         
         'markdown_link_attr_modifier': {
-            # config here
+            'new_tab': 'on',
+            'no_referrer': 'external_only',
+            'auto_title': 'on',
         },
     },
     'output_format': 'html5',
@@ -119,15 +150,23 @@ For more information, see [Settings - Pelican Docs](https://docs.getpelican.com/
 
 ## Options
 
-Options about how to match `<a>` links:
+By default, this extension does NOT do anything. Configuration items:
 
-- `external_only`: Default is `True`. Only modify external links.
+- `new_tab`: Open links in new tab, set `target="_blank"` and `rel="noopener"` attributes. Default value: `'off'`. Valid values: `('on', 'external_only', 'off')`
+- `no_referrer`: No referrer. Default value: `'off'`. Valid values: `('on', 'external_only', 'off')`
+- `auto_title`: Auto add title attribute. Default value: `'off'`. Valid values: `('on', 'off')`
+- `custom_attrs`: Custom attributes. Default value: `{}`. Valid value is a `dict`.
 
-Options about `<a>` tag attributes:
+Values about how to match `<a>` links:
 
-- `new_tab`: Default is `True`. Open in new tab, set `target="_blank"` attribute.
-- `security`: Default is `True`. Security and privacy, [no referrer](https://developer.mozilla.org/en-US/docs/Web/Security/Referer_header:_privacy_and_security_concerns), [no opener](https://mathiasbynens.github.io/rel-noopener/).
-- `custom_attrs`: Default is `{}`, Custom attributes, dict variable.
+- `on`: Modify all valid links.
+- `external_only`: Only modify external valid links.
+- `off`: Do not modify any link.
+
+FYI:
+
+- [MDN: Referer header: privacy and security concerns](https://developer.mozilla.org/en-US/docs/Web/Security/Referer_header:_privacy_and_security_concerns)
+- [About `rel=noopener`](https://mathiasbynens.github.io/rel-noopener/)
 
 ## Tests
 
