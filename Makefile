@@ -30,7 +30,7 @@ rebuild build dist/*.whl dist/*.tar.gz: ./setup.py ./markdown_link_attr_modifier
 	# make sure clean old versions
 	make clean
 
-	$(PYTHON) ./setup.py sdist bdist_wheel --universal
+	$(PYTHON) ./setup.py sdist bdist_wheel
 
 	# 'pip install' is buggy when .egg-info exist
 	rm -rf *.egg-info build
