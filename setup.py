@@ -4,7 +4,7 @@
 from setuptools import setup
 
 # Impossible? to update only Readme.md but keep version number in PyPI.
-# Gancui use a dummy readme instead.
+# Gancui use a dummy readme file instead.
 with open("Readme.PyPI.md", "r") as f:
     long_description = f.read()
 
@@ -27,9 +27,8 @@ setup(
     classifiers = [
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'Topic :: Text Processing :: Markup :: Markdown',
     ],
-    python_requires = '>=3.6'
+    python_requires = '>=3.6', # PEP 498, f-strings
 )
