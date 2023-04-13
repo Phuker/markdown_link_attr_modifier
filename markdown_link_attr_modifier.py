@@ -22,14 +22,14 @@ https://python-markdown.github.io/extensions/api/
 https://docs.python.org/3/library/xml.etree.elementtree.html
 """
 
-import os
 import sys
 import logging
 import unittest
 
 import markdown
-from markdown.extensions import Extension
-from markdown.treeprocessors import Treeprocessor
+
+
+logger = logging.getLogger(__name__)
 
 
 # https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel
@@ -58,7 +58,7 @@ def link_add_rel_attr(elem, append_values):
     elem.set('rel', ' '.join(new_list))
 
 
-class LinkAttrModifierTreeprocessor(Treeprocessor):
+class LinkAttrModifierTreeprocessor(markdown.treeprocessors.Treeprocessor):
     def __init__(self, *args, **kwargs):
         self.config = kwargs.pop('config')
         super(LinkAttrModifierTreeprocessor, self).__init__(*args, **kwargs)
@@ -112,7 +112,7 @@ class LinkAttrModifierTreeprocessor(Treeprocessor):
                 elem.set(k, config_custom_attrs[k])
 
 
-class LinkAttrModifierExtension(Extension):
+class LinkAttrModifierExtension(markdown.extensions.Extension):
     def __init__(self, **kwargs):
         # can not use mixed type value, e.g. (True, 'string_value', False),
         # or ValueError: Cannot parse bool value: 'external_only'
@@ -164,7 +164,6 @@ def print_help():
 
 class LinkAttrModifierExtensionTests(unittest.TestCase):
     def test_warm_up(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n') # break incomplete line output by 'unittest -v'
 
         s = '''
@@ -173,12 +172,12 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
 [abc](https://www.example.com/)
 
 '''
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('href="https://www.example.com/"', result)
 
         config = {
@@ -186,13 +185,12 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'no_referrer': 'external_only',
             'auto_title': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('href="https://www.example.com/"', result)
 
     def test_skip_link(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n')
 
         # not work: 
@@ -207,16 +205,16 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
 
 [test5](mailto:test6@example.com)
 '''
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {
             'new_tab': 'on',
             'no_referrer': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
 
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
 
         self.assertIn('<a href="javascript:alert(1);">alert0</a>', result)
         self.assertIn('<a href="#test-3">test-2</a>', result)
@@ -224,19 +222,18 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
         self.assertIn('<a href="mailto:test6@example.com">test5</a>', result)
 
     def test_local_link(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n')
 
         s = '[abc](local.html)'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {
             'new_tab': 'off',
             'no_referrer': 'off',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertNotIn('rel=', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -245,9 +242,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'external_only',
             'no_referrer': 'off',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertNotIn('rel=', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -256,9 +253,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'on',
             'no_referrer': 'off',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener"', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -267,9 +264,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'off',
             'no_referrer': 'external_only',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertNotIn('rel=', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -278,9 +275,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'external_only',
             'no_referrer': 'external_only',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertNotIn('rel=', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -289,9 +286,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'on',
             'no_referrer': 'external_only',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener"', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -300,9 +297,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'off',
             'no_referrer': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertIn('rel="noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
@@ -311,9 +308,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'external_only',
             'no_referrer': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertIn('rel="noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
@@ -322,27 +319,26 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'on',
             'no_referrer': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
     
     def test_external_link(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n')
 
         s = '[example](https://www.example.com/)'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {
             'new_tab': 'off',
             'no_referrer': 'off',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertNotIn('rel=', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -351,9 +347,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'external_only',
             'no_referrer': 'off',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener"', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -362,9 +358,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'on',
             'no_referrer': 'off',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener"', result)
         self.assertNotIn('referrerpolicy=', result)
@@ -373,9 +369,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'off',
             'no_referrer': 'external_only',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertIn('rel="noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
@@ -384,9 +380,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'external_only',
             'no_referrer': 'external_only',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
@@ -395,9 +391,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'on',
             'no_referrer': 'external_only',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
@@ -406,9 +402,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'off',
             'no_referrer': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertNotIn('target=', result)
         self.assertIn('rel="noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
@@ -417,9 +413,9 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'external_only',
             'no_referrer': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
@@ -428,46 +424,44 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
             'new_tab': 'on',
             'no_referrer': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="_blank"', result)
         self.assertIn('rel="noopener noreferrer"', result)
         self.assertIn('referrerpolicy="no-referrer"', result)
     
     def test_rel(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n')
 
         s = "[example](https://www.example.com/){: rel='nofollow noreferrer'}"
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {
             'new_tab': 'on',
             'no_referrer': 'on',
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('rel="nofollow noreferrer noopener"', result)
 
     def test_custom_attrs(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n')
 
         s = '[example](https://www.example.com/)'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'custom_attrs': {'fuck-key': 'fuck-value'}}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('fuck-key="fuck-value"', result)
 
         config = {'custom_attrs': {'href': 'fuck-value'}}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('href="fuck-value"', result)
 
         config = {
@@ -478,73 +472,70 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
                 'rel': 'fuck-rel',
             },
         }
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('target="fuck-target"', result)
         self.assertIn('rel="fuck-rel"', result)
     
     def test_auto_title(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n')
 
         s = '[1 > 0](local.html)'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'auto_title': 'on'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('title="1 &gt; 0"', result)
 
         s = '[1 > 0](local.html "0 < 1")'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'auto_title': 'on'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('title="0 &lt; 1"', result)
 
         s = '<https://example.com/>'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'auto_title': 'on'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('title="https://example.com/"', result)
 
         s = '[header1](#h1)'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'auto_title': 'on'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('title="header1"', result)
 
         s = '[12![34](56.png)789](local.html)'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'auto_title': 'on'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('title="12789"', result)
 
         s = '[a **b** `c` d](https://example.com/)'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'auto_title': 'on'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         self.assertIn('title="a b c d"', result)
 
-    
     def test_xml_level(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n')
 
         s = '''
@@ -553,37 +544,36 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
     - [example](https://www.example.com/)
 - ghi
 '''
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'new_tab': 'on'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
 
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        log.info('Result HTML = %s', result)
+        logger.info('Result HTML = %s', result)
         
         self.assertIn('href="https://www.example.com/"', result)
         self.assertIn('target="_blank"', result)
     
     def test_config(self):
-        log = logging.getLogger("LinkAttrModifierExtensionTests")
         sys.stderr.write('\n')
 
         s = '[example](https://www.example.com/)'
-        log.info('markdown = %s', s)
+        logger.info('markdown = %s', s)
 
         config = {'new_tab': 'xxxyyy'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         with self.assertRaises(ValueError) as e:
             _ = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
         
-        log.info('Error: %r', e.exception)
+        logger.info('Error: %r', e.exception)
 
         config = {'xxxyyy': 'xxxyyy'}
-        log.info('Config: %r', config)
+        logger.info('Config: %r', config)
         with self.assertRaises(KeyError) as e:
             _ = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
 
-        log.info('Error: %r', e.exception)
+        logger.info('Error: %r', e.exception)
 
 
 if __name__ == "__main__":
