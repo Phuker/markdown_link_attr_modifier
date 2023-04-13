@@ -169,11 +169,11 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
         print('\x1b[1;36m= = = = = = = = = = = = = = = = \x1b[0m', file=sys.stderr)
     
     def md2html(self, s, config):
-        logger.info('Markdown:\n%s', s.strip())
+        logger.info('Markdown:\n%s', s)
         logger.info('Config: %r', config)
 
         result = markdown.markdown(s, extensions=['extra', LinkAttrModifierExtension(**config)])
-        logger.info('Result HTML:\n%s', result.strip())
+        logger.info('Result HTML:\n%s', result)
         print('\x1b[36m--------\x1b[0m', file=sys.stderr)
 
         return result
@@ -184,11 +184,19 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
 # hello
 
 [abc](https://www.example.com/)
+
+<https://www.example.org/>
+
+[abc][link1]
+
+[link1]: https://example.com/
 '''
 
         config = {}
         result = self.md2html(s, config)
         self.assertIn('href="https://www.example.com/"', result)
+        self.assertIn('href="https://www.example.org/"', result)
+        self.assertIn('href="https://example.com/"', result)
 
         config = {
             'new_tab': 'on',
@@ -197,6 +205,8 @@ class LinkAttrModifierExtensionTests(unittest.TestCase):
         }
         result = self.md2html(s, config)
         self.assertIn('href="https://www.example.com/"', result)
+        self.assertIn('href="https://www.example.org/"', result)
+        self.assertIn('href="https://example.com/"', result)
 
     def test_skip_link(self):
         # not work:
